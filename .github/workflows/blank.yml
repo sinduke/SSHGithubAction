@@ -79,7 +79,10 @@ jobs:
     
         echo "Raw Response: $RESPONSE"
         SUMMARY=$(echo "$RESPONSE" | jq -r .choices[0].message.content)
-        echo "::notice::📓 ChatGPT Summary: $SUMMARY"  >> "$GITHUB_OUTPUT"
+        # ✅ 日志中输出提示
+        echo "::notice::📓 ChatGPT Summary: $SUMMARY"
+        # ✅ 输出供后续使用
+        echo "summary=$SUMMARY" >> "$GITHUB_OUTPUT"
 
     - name: 📢 Notify DingTalk
       if: always()

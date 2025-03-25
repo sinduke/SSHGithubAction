@@ -58,7 +58,7 @@ jobs:
       run: |
         LAST_MSG=$(git log -1 --pretty=%B)
         echo "Commit Message: $LAST_MSG"
-        RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
+        RESPONSE=$(curl https://api.deepseek.com/chat/completions \
           -s -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
           -H "Content-Type: application/json" \
           -d '{

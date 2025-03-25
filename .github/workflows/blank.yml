@@ -94,13 +94,23 @@ jobs:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
         GPT_SUMMARY: ${{ steps.gpt.outputs.summary }}
       run: |
-          TEXT="### 🚨 假装部署成功！\n\
-          - 人员: \`${{ github.actor }}\`\n
-          - 分支: \`${{ github.ref_name }}\`\n\
-          - 时间: \`$NOW\`\n\
-          - 服务器: \`47.236.41.229\`\n\
-          \n$GPT_SUMMARY\n\
-          \n🎉 欢迎大爷下次再来~"
+          TEXT=$(cat <<EOF
+          ### 🚨 假装部署成功！
+          
+          - 👤 人员：\`${{ github.actor }}\`
+          - 🌿 分支：\`${{ github.ref_name }}\`
+          - 🕰️ 时间：\`$NOW\`
+          - 🖥️ 服务器：\`47.236.41.229\`
+          
+          ---
+
+          $GPT_SUMMARY
+
+          ---
+          
+          🎉 欢迎大爷下次再来 ~
+          EOF
+          )
 
           # 构建合法 JSON
           JSON_PAYLOAD=$(jq -n --arg title "✨God Mode✨" --arg text "$TEXT" '{

@@ -57,21 +57,30 @@ jobs:
       env:
         OPENAI_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       run: |
+
+        # 获取 commit message
         LAST_MSG=$(git log -1 --pretty=%B)
         echo "Commit Message: $LAST_MSG"
-        ESCAPED_MSG=$(jq -Rn --arg msg "$LAST_MSG" '$msg')
-    
+
+        # 拼接完整 content 字符串
+        FULL_CONTENT="请用一段开玩笑的话简要总结下面这次提交的内容: $LAST_MSG"
+        
+        # 用 jq 转成合法 JSON 字符串（带引号、转义 \n 等）
+        ESCAPED_CONTENT=$(jq -Rn --arg msg "$FULL_CONTENT" '$msg')
+        
+        # 构建 JSON 请求体（直接插入转义好的内容）
         REQUEST_BODY=$(cat <<EOF
         {
-        "model": "deepseek-chat",
-        "messages": [
-          {
-            "role": "user",
-            "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $ESCAPED_MSG"
-          }
-        ]
+          "model": "deepseek-chat",
+          "messages": [
+            {
+              "role": "user",
+              "content": $ESCAPED_CONTENT
+            }
+          ]
         }
-        EOF)
+        EOF
+        )
     
         RESPONSE=$(curl https://api.deepseek.com/chat/completions \
           -s -H "Authorization: Bearer $OPENAI_API_KEY" \

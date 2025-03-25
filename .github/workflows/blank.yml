@@ -20,6 +20,6 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H 47.236.41.229 >> ~/.ssh/known_hosts
 
-    - name: Connect and run command
+    - name: SSH Test
       run: |
-        ssh root@47.236.41.229 "echo 'Hello from GitHub Actions!'"
+        ssh -i ~/.ssh/id_rsa root@47.236.41.229 "echo '✅ GitHub Actions 成功连接服务器！'"

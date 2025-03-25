@@ -1,25 +1,99 @@
 # .github/workflows/deploy.yml
-name: SSH Deploy
+name: ✨ God Mode Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    name: ✨ God Mode Deployment
     steps:
-    - name: Checkout repo
+    - name: 🔁 Checkout
       uses: actions/checkout@v4
 
-    - name: Setup SSH
+    # - name: 💡 Smart Path Filter (only deploy on src/ changes)
+    #   id: path-filter
+    #   uses: dorny/paths-filter@v3
+    #   with:
+    #     filters: |
+    #       deploy:
+    #         - 'src/**'
+
+    # - name: 🚨 Exit if no deploy-related changes
+    #   if: steps.path-filter.outputs.deploy != 'true'
+    #   run: echo "No deploy-related changes. Skipping deployment." && exit 0
+
+    - name: 🔐 Setup SSH
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H 47.236.41.229 >> ~/.ssh/known_hosts
 
-    - name: SSH Test
+    - name: 🚀 假装部署
       run: |
-        ssh -i ~/.ssh/id_rsa root@47.236.41.229 "echo '✅ GitHub Actions 成功连接服务器！'"
+        echo "✨ Pretending to deploy on server..."
+        echo "cd /var/www/project"
+        echo "git pull origin main"
+        echo "echo '💫 Building project...'"
+        echo "sleep 2"
+        echo "echo '🌟 Pretend build complete.'"
+        echo "echo '🚀 Restarting server...'"
+        echo "sleep 1"
+        echo "echo '✅ Done.'"
+
+    - name: 📈 Report Build Info
+      run: |
+        echo "::notice::👤 User: ${{ github.actor }}"
+        echo "::notice::🔹 Branch: ${{ github.ref_name }}"
+        echo "::notice::🔹 Commit: ${{ github.sha }}"
+        echo "::notice::⏳ Time: $(date '+%Y-%m-%d %H:%M:%S')"
+
+    - name: 💬 Generate Deploy Summary with ChatGPT
+      env:
+        OPENAI_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      run: |
+        LAST_MSG=$(git log -1 --pretty=%B)
+        echo "Commit Message: $LAST_MSG"
+        RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
+          -s -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+              "model": "deepseek-chat",
+              "messages": [
+                {"role": "user", "content": "请用一段开玩笑的话简要总结下面这次提交的内容: '$LAST_MSG'"}
+              ]
+            }')
+        SUMMARY=$(echo "$RESPONSE" | jq -r .choices[0].message.content)
+        echo "::notice::📓 ChatGPT Summary: $SUMMARY"
+
+    - name: 📢 Notify DingTalk
+      if: always()
+      env:
+        DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+      run: |
+        curl "$DINGTALK_WEBHOOK" \
+        -H 'Content-Type: application/json' \
+        -d '{
+          "msgtype": "markdown",
+          "markdown": {
+            "title": "✨God Mode✨",
+            "text": "### 🚨 假装部署成功！\n- 人员: `${{ github.actor }}`\n- 分支: `${{ github.ref_name }}`\n- 时间: `$(date '+%Y-%m-%d %H:%M:%S')`\n- 服务器: `47.236.41.229`\n\n🎉 欢迎大爷下次再来~"
+          }
+        }'
+
+    - name: 💥 Print Final ASCII
+      run: |
+        echo ""
+        echo -e "\033[35m"
+        echo "   ____       _     __  __           _      "
+        echo "  / ___| ___ | |_  |  \\/  | ___   __| | ___ "
+        echo " | |  _ / _ \| __| | |\/| |\/ _ \ / _\` |\/ _ \"
+        echo " | |_| | (_) | |_  | |  | | (_) | (_| |  __\/"
+        echo "  \____|\___\/ \__| |_|  |_|\___\/ \__,_|\___|"
+        echo -e "\033[0m"
+        echo "     ✨ GitHub Actions · God Mode Engaged ✨"
+        echo ""

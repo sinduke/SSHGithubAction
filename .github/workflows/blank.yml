@@ -54,19 +54,30 @@ jobs:
 
     - name: 💬 Generate Deploy Summary with ChatGPT
       env:
-        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       run: |
         LAST_MSG=$(git log -1 --pretty=%B)
         echo "Commit Message: $LAST_MSG"
+    
+        REQUEST_BODY=$(cat <<EOF
+    {
+      "model": "deepseek-chat",
+      "messages": [
+        {
+          "role": "user",
+          "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $LAST_MSG"
+        }
+      ]
+    }
+    EOF
+    )
+    
         RESPONSE=$(curl https://api.deepseek.com/chat/completions \
-          -s -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+          -s -H "Authorization: Bearer $OPENAI_API_KEY" \
           -H "Content-Type: application/json" \
-          -d '{
-              "model": "deepseek-chat",
-              "messages": [
-                {"role": "user", "content": "请用一段开玩笑的话简要总结下面这次提交的内容: '$LAST_MSG'"}
-              ]
-            }')
+          -d "$REQUEST_BODY")
+    
+        echo "Raw Response: $RESPONSE"
         SUMMARY=$(echo "$RESPONSE" | jq -r .choices[0].message.content)
         echo "::notice::📓 ChatGPT Summary: $SUMMARY"
 

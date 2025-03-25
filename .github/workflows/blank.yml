@@ -85,14 +85,8 @@ jobs:
       if: always()
       env:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
-        DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
         GPT_SUMMARY: ${{ steps.gpt.outputs.summary }}
       run: |
-        NOW=$(date '+%Y-%m-%d %H:%M:%S')
-          TIMESTAMP=$(($(date +%s%N)/1000000))
-          SIGN=$(echo -n "$TIMESTAMP $DINGTALK_SECRET" | openssl dgst -sha256 -hmac "$DINGTALK_SECRET" -binary | base64 | jq -sRr @uri)
-          FINAL_URL="https://oapi.dingtalk.com/robot/send?access_token=$DINGTALK_ACCESS_TOKEN&timestamp=$TIMESTAMP&sign=$SIGN"
-
           TEXT="### 🚨 假装部署成功！\n\
           - 人员: \`${{ github.actor }}\`\n
           - 分支: \`${{ github.ref_name }}\`\n\
@@ -101,7 +95,7 @@ jobs:
           \n$GPT_SUMMARY\n\
           \n🎉 欢迎大爷下次再来~"
 
-          curl "$FINAL_URL" \
+          curl "$DINGTALK_WEBHOOK" \
             -H 'Content-Type: application/json' \
             -d "{
               \"msgtype\": \"markdown\",

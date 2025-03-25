@@ -94,6 +94,7 @@ jobs:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
         GPT_SUMMARY: ${{ steps.gpt.outputs.summary }}
       run: |
+          NOW=$(date '+%Y-%m-%d %H:%M:%S')
           TEXT=$(cat <<EOF
           ### 🚨 假装部署成功！
           

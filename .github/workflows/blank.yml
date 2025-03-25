@@ -53,6 +53,7 @@ jobs:
         echo "::notice::⏳ Time: $(date '+%Y-%m-%d %H:%M:%S')"
 
     - name: 💬 Generate Deploy Summary with ChatGPT
+      id: gpt
       env:
         OPENAI_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       run: |
@@ -78,24 +79,37 @@ jobs:
     
         echo "Raw Response: $RESPONSE"
         SUMMARY=$(echo "$RESPONSE" | jq -r .choices[0].message.content)
-        echo "::notice::📓 ChatGPT Summary: $SUMMARY"
+        echo "::notice::📓 ChatGPT Summary: $SUMMARY"  >> "$GITHUB_OUTPUT"
 
     - name: 📢 Notify DingTalk
       if: always()
       env:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
+        DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
+        GPT_SUMMARY: ${{ steps.gpt.outputs.summary }}
       run: |
         NOW=$(date '+%Y-%m-%d %H:%M:%S')
-        TEXT="### 🚨 假装部署成功！\n- 人员: \`${{ github.actor }}\`\n- 分支: \`${{ github.ref_name }}\`\n- 时间: \`$NOW\`\n- 服务器: \`47.236.41.229\`\n\n🎉 欢迎大爷下次再来~"
-        curl "$DINGTALK_WEBHOOK" \
-          -H 'Content-Type: application/json' \
-          -d "{
-            \"msgtype\": \"markdown\",
-            \"markdown\": {
-              \"title\": \"✨God Mode✨\",
-              \"text\": \"$TEXT\"
-            }
-          }"
+          TIMESTAMP=$(($(date +%s%N)/1000000))
+          SIGN=$(echo -n "$TIMESTAMP $DINGTALK_SECRET" | openssl dgst -sha256 -hmac "$DINGTALK_SECRET" -binary | base64 | jq -sRr @uri)
+          FINAL_URL="https://oapi.dingtalk.com/robot/send?access_token=$DINGTALK_ACCESS_TOKEN&timestamp=$TIMESTAMP&sign=$SIGN"
+
+          TEXT="### 🚨 假装部署成功！\n\
+          - 人员: \`${{ github.actor }}\`\n
+          - 分支: \`${{ github.ref_name }}\`\n\
+          - 时间: \`$NOW\`\n\
+          - 服务器: \`47.236.41.229\`\n\
+          \n$GPT_SUMMARY\n\
+          \n🎉 欢迎大爷下次再来~"
+
+          curl "$FINAL_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"msgtype\": \"markdown\",
+              \"markdown\": {
+                \"title\": \"✨God Mode✨\",
+                \"text\": \"$TEXT\"
+              }
+            }"
 
     - name: 💥 Print Final ASCII
       run: |

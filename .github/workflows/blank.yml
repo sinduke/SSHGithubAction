@@ -60,17 +60,16 @@ jobs:
         echo "Commit Message: $LAST_MSG"
     
         REQUEST_BODY=$(cat <<EOF
-    {
-      "model": "deepseek-chat",
-      "messages": [
         {
-          "role": "user",
-          "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $LAST_MSG"
+        "model": "deepseek-chat",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $LAST_MSG"
+          }
+        ]
         }
-      ]
-    }
-    EOF
-    )
+        EOF)
     
         RESPONSE=$(curl https://api.deepseek.com/chat/completions \
           -s -H "Authorization: Bearer $OPENAI_API_KEY" \

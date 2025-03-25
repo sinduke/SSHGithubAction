@@ -75,15 +75,17 @@ jobs:
       env:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
       run: |
+        NOW=$(date '+%Y-%m-%d %H:%M:%S')
+        TEXT="### 🚨 假装部署成功！\n- 人员: \`${{ github.actor }}\`\n- 分支: \`${{ github.ref_name }}\`\n- 时间: \`$NOW\`\n- 服务器: \`47.236.41.229\`\n\n🎉 欢迎大爷下次再来~"
         curl "$DINGTALK_WEBHOOK" \
-        -H 'Content-Type: application/json' \
-        -d '{
-          "msgtype": "markdown",
-          "markdown": {
-            "title": "✨God Mode✨",
-            "text": "### 🚨 假装部署成功！\n- 人员: `${{ github.actor }}`\n- 分支: `${{ github.ref_name }}`\n- 时间: `$(date '+%Y-%m-%d %H:%M:%S')`\n- 服务器: `47.236.41.229`\n\n🎉 欢迎大爷下次再来~"
-          }
-        }'
+          -H 'Content-Type: application/json' \
+          -d "{
+            \"msgtype\": \"markdown\",
+            \"markdown\": {
+              \"title\": \"✨God Mode✨\",
+              \"text\": \"$TEXT\"
+            }
+          }"
 
     - name: 💥 Print Final ASCII
       run: |

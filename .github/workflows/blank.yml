@@ -104,9 +104,10 @@ jobs:
         DINGTALK_WEBHOOK: ${{ secrets.DINGTALK_WEBHOOK }}
         GPT_SUMMARY: ${{ steps.gpt.outputs.summary }}
       run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
           NOW=$(date '+%Y-%m-%d %H:%M:%S')
           TEXT=$(cat <<EOF
-          ### 🚨 假装部署成功！
+          ### 📜 帝国通告 ·「$REPO_NAME」完成战略级部署 ☄️
           
           - 👤 人员：\`${{ github.actor }}\`
           - 🌿 分支：\`${{ github.ref_name }}\`

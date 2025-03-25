@@ -54,7 +54,7 @@ jobs:
 
     - name: 💬 Generate Deploy Summary with ChatGPT
       env:
-        OPENAI_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       run: |
         LAST_MSG=$(git log -1 --pretty=%B)
         echo "Commit Message: $LAST_MSG"

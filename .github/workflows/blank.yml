@@ -59,6 +59,9 @@ jobs:
       run: |
         LAST_MSG=$(git log -1 --pretty=%B)
         echo "Commit Message: $LAST_MSG"
+
+        # 使用 jq 安全编码 commit message
+        ESCAPED_MSG=$(jq -Rn --arg str "$LAST_MSG" '$str')
     
         REQUEST_BODY=$(cat <<EOF
         {
@@ -66,7 +69,7 @@ jobs:
         "messages": [
           {
             "role": "user",
-            "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $LAST_MSG"
+            "content": "请用一段开玩笑的话简要总结下面这次提交的内容: $ESCAPED_MSG"
           }
         ]
         }

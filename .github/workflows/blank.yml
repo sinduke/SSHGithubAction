@@ -22,4 +22,4 @@ jobs:
 
     - name: Connect and run command
       run: |
-        ssh root@ssh@47.236.41.229 "echo 'Hello from GitHub Actions!'"
+        ssh root@47.236.41.229 "echo 'Hello from GitHub Actions!'"
